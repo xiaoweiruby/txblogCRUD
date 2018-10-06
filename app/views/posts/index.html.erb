@@ -1,0 +1,7 @@
+
+<% @posts.each do |post| %>
+  <h2 class="card"><%= link_to post.title, post %></h2>
+  <p class="date"><%= post.created_at.strftime("%B, %d, %Y") %> </p>
+<% end %>
+<%= link_to "New Post", new_post_path, class:"button" %>
+<%= link_to "Back", posts_path, class:"button" %>
