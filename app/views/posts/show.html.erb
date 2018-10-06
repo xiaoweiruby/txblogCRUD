@@ -13,6 +13,7 @@
 		  </div>
 
 		  <!-- Right side -->
+			 <% if current_user %>
 		  <div class="level-right">
 		  	<p class="level-item">
 		    	<%= link_to "Edit", edit_post_path(@post), class:"button" %>
@@ -20,6 +21,7 @@
 		  	<p class="level-item">
 				<%= link_to 'Delete', post_path(@post), method: :delete, class: "button is-danger", data: { confirm: 'Are you sure?'  } %>
 		  </div>
+			<% end %>
 		</nav>
 		<hr/>
 
