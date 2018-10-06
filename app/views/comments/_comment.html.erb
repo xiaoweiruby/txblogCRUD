@@ -1,8 +1,15 @@
-<%= comment.name %>
-<%= comment.body %>
-<%= time_ago_in_words(comment.created_at) %>
+<div class="box">
+  <article class="media">
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <strong><%= comment.name %>:</strong>
+          <%= comment.body%>
+        </p>
+      </div>
+    </div>
+     <%= link_to 'Delete', [comment.post, comment],
+                  method: :delete, class: "button is-danger", data: { confirm: 'Are you sure?' } %>
+  </article>
 
-<%= link_to 'Delete', [comment.post, comment],
-                                  method: :delete,
-                                  class: "button",
-                                    data: { confirm: 'Are you sure?' } %></p>
+</div>

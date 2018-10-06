@@ -1,7 +1,23 @@
+<% content_for :page_title,  "Index" %>
 
-<% @posts.each do |post| %>
-  <h2 class="card"><%= link_to post.title, post %></h2>
-  <p class="date"><%= post.created_at.strftime("%B, %d, %Y") %> </p>
-<% end %>
-<%= link_to "New Post", new_post_path, class:"button" %>
-<%= link_to "Back", posts_path, class:"button" %>
+<div class="section">
+	<div class="container">
+		<% @posts.each do |post| %>
+			<div class="card">
+		  <div class="card-content">
+		    <div class="media">
+		      <div class="media-content">
+		        <p class="title is-4"><%= link_to post.title, post  %></p>
+		      </div>
+		    </div>
+		    <div class="body">
+		     	<%= post.body %>
+		    </div>
+		    <div class="comment-count">
+		    	<span class="tag is-rounded"><%= post.comments.count %> comments</span>
+		    </div>
+		  </div>
+		</div>
+		<% end %>
+	</div>
+</div>
