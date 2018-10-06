@@ -17,6 +17,7 @@ https://github.com/shenzhoudance/txblogCRUD
 ![devise 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-2281f045f8adbd79.gif?imageMogr2/auto-orient/strip)
 
 # 5、用户 heroku 上传体系
+![heroku 上传3.gif](https://upload-images.jianshu.io/upload_images/7680238-b2147961e0436ed6.gif?imageMogr2/auto-orient/strip)
 
 #第一部分：基本的功能体系；
 git checkout -b posts
@@ -773,6 +774,37 @@ private
    end
 end
 
+```
+```
+git checkout -b heroku
+---
+Gemfile
+---
+group :development, :test do
+  gem 'sqlite3', '1.3.13'
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  # Adds support for Capybara system testing and selenium driver
+  gem 'capybara', '~> 2.13'
+  gem 'selenium-webdriver'
+end
+
+group :production do
+  gem 'pg', '0.20.0'
+end
+---
+bundle install
+rails server
+---
+git add .
+git commit -m "Update Gemfile for Heroku"
+```
+```
+heroku create xiaoweiblog
+git push heroku heroku:master
+rake assets:clean
+heroku run rake db:migrate
+heroku open
 ```
 
 # 二、中级知识体系的学习方式
