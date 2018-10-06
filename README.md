@@ -1,4 +1,5 @@
-现在我们开始学习 Ruby on Rails 的知识体系，现在主要是从知识体系叠加的角度来思考问题。
+现在我们开始学习 Ruby on Rails 的知识体系，
+现在主要是从知识体系叠加的角度来思考问题。
 
 
 一、刚刚入门的孩子的学习方式：
@@ -17,7 +18,7 @@ https://github.com/shenzhoudance/txblogCRUD
 ![devise 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-2281f045f8adbd79.gif?imageMogr2/auto-orient/strip)
 
 # 5、用户 heroku 上传体系
-![heroku 上传3.gif](https://upload-images.jianshu.io/upload_images/7680238-b2147961e0436ed6.gif?imageMogr2/auto-orient/strip)
+![heroku 上传3.gif](https://ws1.sinaimg.cn/large/006tNbRwly1fvyyiumykzg30z40ieb2d.gif)
 
 #第一部分：基本的功能体系；
 git checkout -b posts
