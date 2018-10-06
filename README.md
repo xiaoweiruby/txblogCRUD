@@ -20,6 +20,8 @@ https://github.com/shenzhoudance/txblogCRUD
 # 5、用户 heroku 上传体系
 ![heroku 上传3.gif](https://ws1.sinaimg.cn/large/006tNbRwly1fvyyiumykzg30z40ieb2d.gif)
 
+![heroku 删除.gif](https://ws4.sinaimg.cn/large/006tNbRwly1fvyyo5yw8bg30z40ieqli.gif)
+
 #第一部分：基本的功能体系；
 git checkout -b posts
 rails g controller posts
