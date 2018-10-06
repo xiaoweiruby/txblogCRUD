@@ -1,20 +1,22 @@
 现在我们开始学习 Ruby on Rails 的知识体系，现在主要是从知识体系叠加的角度来思考问题。
 
 
-# 一、刚刚入门的孩子的学习方式：
->1、基础 POST 的 CRUD 功能体系；
+一、刚刚入门的孩子的学习方式：
+# 1、基础 POST 的 CRUD 功能体系；
 ![CRUD 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-80aecc22ae3370b1.gif?imageMogr2/auto-orient/strip)
 
 https://github.com/shenzhoudance/txblogCRUD
 
-2、用户 COMMENT 评论的体系；
+# 2、用户 COMMENT 评论的体系；
 ![comment 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-82e52ba12840fdca.gif?imageMogr2/auto-orient/strip)
 
-3、页面 bulma 美化体系；
+# 3、页面 bulma 美化体系；
 ![bulma 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-e568ea9e828f6606.gif?imageMogr2/auto-orient/strip)
 
-4、用户 devise 的对接体系；
-5、用户 heroku 上传体系
+# 4、用户 devise 的对接体系；
+![devise 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-2281f045f8adbd79.gif?imageMogr2/auto-orient/strip)
+
+# 5、用户 heroku 上传体系
 
 #第一部分：基本的功能体系；
 git checkout -b posts
@@ -445,6 +447,331 @@ app/views/comments/-form.html.erb
 </div>
 <%= f.button :submit, 'Leave a reply', class: "button is-primary" %>
 <% end %>
+
+```
+# 第四部分：添加用户功能模块
+（1）只有登录才可以评论
+（2）只有登录才可以修改
+（3）只能修改自己的数据
+（4）没有登录跳转到登录
+
+
+gem 'devise', '~> 4.3'
+rails generate devise:install
+config/environments/development.rb:
+config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+rails generate devise:views
+rake db:migrate
+rails g devise User
+rake db:migrate
+
+config/routes.rb
+```
+  devise_for :users, controllers: { registrations: 'registrations' }
+```
+touch app/controllers/registrations_controller.rb
+```
+# https://jacopretorius.net/2014/03/adding-custom-fields-to-your-devise-user-model-in-rails-4.html
+class RegistrationsController < Devise::RegistrationsController
+
+ private
+
+  def sign_up_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
+
+  def account_update_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation, :current_password)
+  end
+
+end
+```
+
+
+rails g migration AddFieldsToUsers name:string
+```
+def change
+  add_column :users, :name, :string
+  add_column :users, :username, :string
+  add_index :users, :username, unique: true
+ end
+end
+```
+rake db:migrate
+```
+
+app/models/user.rb
+```
+has_many :posts
+```
+app/models/post.rb
+```
+belongs_to :user
+
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Twittter</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= stylesheet_link_tag "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+  	<% if flash[:notice] %>
+  		<div class="notification is-primary global-notification">
+  			<p class="notice"><%= notice %></p>
+  		</div>
+  	<% end %>
+  	<% if flash[:alert] %>
+  		<div class="notification is-danger global-notification">
+  			<p class="alert"><%= alert %></p>
+  		</div>
+  	<% end %>
+  	<nav class="navbar is-info">
+  		<div class="navbar-brand">
+  		<%= link_to root_path, class: "navbar-item" do %>
+  			<h1 class="title is-5">blog</h1>
+  		<% end %>
+			<div class="navbar-burger burger" data-target="navbarExample">
+					<span></span>
+					<span></span>
+					<span></span>
+  		</div>
+  	 </div>
+
+			<div id="navbarExample" class="navbar-menu">
+				<div class="navbar-end">
+          <div class="navbar-item">
+					<div class="field is-grouped">
+						<p class="control">
+							<%= link_to 'New Post', root_path, class: "button is-info is-inverted" %>
+						</p>
+            <% if user_signed_in? %>
+              <p class="control">
+                <%= link_to current_user.name, edit_user_registration_path, class: "button is-info" %>
+              </p>
+              <p>
+                <%= link_to "Logout", destroy_user_session_path, method: :delete, class:"button is-info" %>
+              </p>
+            <% else %>
+            <p class="control">
+              <%= link_to 'Sign In', new_user_session_path, class: "button is-info" %>
+            </p>
+						<p class="control">
+              <%= link_to 'Sign Up', new_user_registration_path, class: "button is-info" %>
+            </p>
+            <% end %>
+            </div>
+					</div>
+				</div>
+			</div>
+  	</nav>
+
+    <%= yield %>
+  </body>
+</html>
+
+```
+app/views/devise/registrations/edit.html.erb
+```
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-4">
+
+      <h2 class="title is-2">Edit <%= resource_name.to_s.humanize %></h2>
+      <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+        <%= f.error_notification %>
+
+          <div class="field">
+            <div class="control">
+              <%= f.input :name, required: true, autofocus: true, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <%= f.input :username, required: true,  input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <%= f.input :email, required: true, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+          </div>
+
+          <div class="field">
+          <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+            <p>Currently waiting confirmation for: <%= resource.unconfirmed_email %></p>
+          <% end %>
+          </div>
+
+          <div class="field">
+            <div class="control">
+            <%= f.input :password, autocomplete: "off", hint: "leave it blank if you don't want to change it", required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+            <%= f.input :password_confirmation, required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <%= f.input :current_password, hint: "we need your current password to confirm your changes", required: true, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+            </div>
+        </div>
+
+        <%= f.button :submit, "Update", class:"button is-info" %>
+
+      <% end %>
+
+        <hr />
+        <h3 class="title is-5">Cancel my account</h3>
+        <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+```
+app/views/devise/registrations/new.html.erb
+```
+<section class="section">
+	<div class="container">
+		<div class="columns is-centered">
+			<div class="column is-4">
+				<h2 class="title is-2">Log in</h2>
+				<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+
+				  <div class="field">
+				  	<div class="control">
+				    	<%= f.input :email, required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+				    </div>
+				  </div>
+
+				  <div class="field">
+				  	<div class="control">
+				    <%= f.input :password, required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+						</div>
+					</div>
+
+					<div class="field">
+				  	<div class="control">
+				    <%= f.input :remember_me, wrapper: false, as: :boolean if devise_mapping.rememberable? %>
+				  	</div>
+					</div>
+
+				  <%= f.button :submit, "Log in", class:"button is-info is-medium" %>
+				<% end %>
+				<br/>
+				<%= render "devise/shared/links" %>
+			</div>
+		</div>
+	</div>
+</section>
+
+```
+app/views/devise/sessions/new.html.erb
+```
+<section class="section">
+	<div class="container">
+		<div class="columns is-centered">
+			<div class="column is-4">
+				<h2 class="title is-2">Log in</h2>
+				<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+
+				  <div class="field">
+				  	<div class="control">
+				    	<%= f.input :email, required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+				    </div>
+				  </div>
+
+				  <div class="field">
+				  	<div class="control">
+				    <%= f.input :password, required: false, input_html: { class: "input"}, wrapper: false, label_html: { class: "label" } %>
+						</div>
+					</div>
+
+					<div class="field">
+				  	<div class="control">
+				    <%= f.input :remember_me, wrapper: false, as: :boolean if devise_mapping.rememberable? %>
+				  	</div>
+					</div>
+
+				  <%= f.button :submit, "Log in", class:"button is-info is-medium" %>
+				<% end %>
+				<br/>
+				<%= render "devise/shared/links" %>
+			</div>
+		</div>
+	</div>
+</section>
+
+```
+rails g migration AddUserIdToPosts user_id:integer
+rake db:migrate
+```
+class PostsController < ApplicationController
+  before_action :authenticate_user!, except: [:index, :show]
+  def index
+    @posts = Post.all.order('created_at DESC')
+  end
+
+  def new
+    @post = current_user.posts.build
+  end
+
+  def create
+    @post = current_user.posts.build(post_params)
+
+      if @post.save
+        redirect_to @post
+      else
+        render 'new'
+      end
+    end
+
+  def show
+   @post = Post.find(params[:id])
+  end
+
+  def edit
+   @post = Post.find(params[:id])
+  end
+
+  def update
+        @post = Post.find(params[:id])
+
+        if @post.update(params[:post].permit(:title, :body))
+            redirect_to @post
+        else
+            render 'edit'
+        end
+    end
+
+  def destroy
+     @post = Post.find(params[:id])
+     @post.destroy
+
+     redirect_to root_path
+  end
+
+
+
+private
+   def post_params
+     params.require(:post).permit(:title, :body)
+   end
+end
 
 ```
 
