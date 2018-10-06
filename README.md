@@ -11,9 +11,13 @@ https://github.com/shenzhoudance/txblogCRUD
 ![comment 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-82e52ba12840fdca.gif?imageMogr2/auto-orient/strip)
 
 3、页面 bulma 美化体系；
+![bulma 展示.gif](https://upload-images.jianshu.io/upload_images/7680238-e568ea9e828f6606.gif?imageMogr2/auto-orient/strip)
+
 4、用户 devise 的对接体系；
 5、用户 heroku 上传体系
 
+#第一部分：基本的功能体系；
+git checkout -b posts
 rails g controller posts
 
 rails g model post title:string body:text
@@ -138,6 +142,8 @@ app/views/posts/-form.erb
 ```
 ---
 
+#第二部分：用户评论体系
+git checkout -b comment
 rails g model  comment name:string body:text post:references
 rake db:migrate
 rails g controller comments
@@ -237,6 +243,211 @@ Rails.application.routes.draw do
 end
 
 ```
+#第叁部分：页面美化体系
+git checkout -b bulma
+https://bulma.io/documentation/
+gem 'bulma-rails', '~> 0.7.1'
+gem 'simple_form', '~> 4.0', '>= 4.0.1'
+bundle install
+
+app/assets/stylesheets/application.scss
+@import "bulma";
+
+app/views/layouts/application.html.erb
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DemoBlog</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+  	<section class="hero is-primary is-medium">
+	  <!-- Hero head: will stick at the top -->
+	  <div class="hero-head">
+	    <nav class="navbar">
+	      <div class="container">
+	        <div class="navbar-brand">
+	          <%= link_to 'Demo Blog', root_path, class: "navbar-item" %>
+	          <span class="navbar-burger burger" data-target="navbarMenuHeroA">
+	            <span></span>
+	            <span></span>
+	            <span></span>
+	          </span>
+	        </div>
+	        <div id="navbarMenuHeroA" class="navbar-menu">
+	          <div class="navbar-end">
+	            <%= link_to "Create New Post", new_post_path, class:"navbar-item" %>
+	          </div>
+	        </div>
+	      </div>
+	    </nav>
+	  </div>
+
+	  <!-- Hero content: will be in the middle -->
+	  <div class="hero-body">
+	    <div class="container has-text-centered">
+	      <h1 class="title">
+	        <%= yield :page_title %>
+	      </h1>
+	    </div>
+	  </div>
+	</section>
+    <%= yield %>
+  </body>
+</html>
+
+```
+app/views/posts/-form.html.erb
+```
+<div class="section">
+<%= simple_form_for @post do |f| %>
+  <div class="field">
+    <div class="control">
+      <%= f.input :title, input_html: { class: 'input' }, wrapper: false, label_html: { class: 'label' } %>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="control">
+      <%= f.input :body, input_html: { class: 'textarea' }, wrapper: false, label_html: { class: 'label' }  %>
+    </div>
+  </div>
+  <%= f.button :submit, class: "button is-primary" %>
+<% end %>
+</div>
+
+```
+app/views/posts/edit.html.erb
+```
+<% content_for :page_title, "Edit Post" %>
+<%= render 'form' %>
+
+```
+app/views/posts/index.html.erb
+```
+<% content_for :page_title,  "Index" %>
+
+<div class="section">
+	<div class="container">
+		<% @posts.each do |post| %>
+			<div class="card">
+		  <div class="card-content">
+		    <div class="media">
+		      <div class="media-content">
+		        <p class="title is-4"><%= link_to post.title, post  %></p>
+		      </div>
+		    </div>
+		    <div class="body">
+		     	<%= post.body %>
+		    </div>
+		    <div class="comment-count">
+		    	<span class="tag is-rounded"><%= post.comments.count %> comments</span>
+		    </div>
+		  </div>
+		</div>
+		<% end %>
+	</div>
+</div>
+```
+app/views/posts/new.html.erb
+```
+<% content_for :page_title, "Create a new post" %>
+<%= render 'form' %>
+
+```
+app/views/posts/show.html.erb
+```
+<% content_for :page_title, @post.title %>
+
+<section class="section">
+	<div class="container">
+		<nav class="level">
+		  <!-- Left side -->
+		  <div class="level-left">
+		    <p class="level-item">
+          <div class="title">
+            <%= @post.title %>
+          </div>
+		    </p>
+		  </div>
+
+		  <!-- Right side -->
+		  <div class="level-right">
+		  	<p class="level-item">
+		    	<%= link_to "Edit", edit_post_path(@post), class:"button" %>
+		  	</p>
+		  	<p class="level-item">
+				<%= link_to 'Delete', post_path(@post), method: :delete, class: "button is-danger", data: { confirm: 'Are you sure?'  } %>
+		  </div>
+		</nav>
+		<hr/>
+
+    <div class="body">
+      <%= @post.body %>
+    </div>
+
+
+	</div>
+</section>
+
+
+<section class="section comments">
+	<div class="container">
+		<h2 class="subtitle is-5"><strong><%= @post.comments.count %></strong> Comments</h2>
+		<%= render @post.comments %>
+		<div class="comment-form">
+			<hr />
+			<h3 class="subtitle is-3">发表评论</h3>
+	 		<%= render 'comments/form' %>
+		</div>
+	</div>
+</section>
+
+```
+app/views/comments/-comment.html.erb
+```
+<div class="box">
+  <article class="media">
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <strong><%= comment.name %>:</strong>
+          <%= comment.body%>
+        </p>
+      </div>
+    </div>
+     <%= link_to 'Delete', [comment.post, comment],
+                  method: :delete, class: "button is-danger", data: { confirm: 'Are you sure?' } %>
+  </article>
+
+</div>
+
+```
+app/views/comments/-form.html.erb
+```
+<%= simple_form_for([@post, @post.comments.build]) do |f| %>
+
+<div class="field">
+  <div class="control">
+    <%= f.input :name, input_html: { class: 'input' }, wrapper: false, label_html: { class: 'label' } %>
+  </div>
+</div>
+
+<div class="field">
+  <div class="control">
+    <%= f.input :body, input_html: { class: 'textarea' }, wrapper: false, label_html: { class: 'label' }  %>
+  </div>
+</div>
+<%= f.button :submit, 'Leave a reply', class: "button is-primary" %>
+<% end %>
+
+```
+
 # 二、中级知识体系的学习方式
 接下来的升级版本就是：
 1、购物车的知识体系；
